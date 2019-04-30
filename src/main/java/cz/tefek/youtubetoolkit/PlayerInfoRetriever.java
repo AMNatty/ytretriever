@@ -41,8 +41,6 @@ public class PlayerInfoRetriever
             }
         }
 
-        System.out.println(configScript);
-
         if (configScript != null)
         {
             configScript = configScript.substring(configScript.indexOf("ytplayer.config"));
@@ -74,23 +72,17 @@ public class PlayerInfoRetriever
         JSONObject assets = mainObj.getJSONObject("assets");
         JSONObject args = mainObj.getJSONObject("args");
 
-        String fmts = args.optString("url_encoded_fmt_stream_map");
-        String adaptiveFmts = args.optString("adaptive_fmts");
+        String fmts = args.optString("url_encoded_fmt_stream_map", null);
+        String adaptiveFmts = args.optString("adaptive_fmts", null);
+        String thumbnail = args.getString("thumbnail_url");
+        String author = args.getString("author");
+        String scriptUrl = "http://s.ytimg.com" + assets.getString("js");
+        String title = args.getString("title");
 
         long views = args.optLong("view_count", Long.MIN_VALUE);
         double loudness = args.optDouble("relative_loudness", 0.0);
 
-        PlayerInfo playerInfo = new PlayerInfo(args.getString("thumbnail_url"), views, loudness, args.optString("author"), args.getString("title"), !adaptiveFmts.isEmpty() ? adaptiveFmts : null, !fmts.isEmpty() ? fmts : null, "http://s.ytimg.com" + assets.getString("js"));
-
-        System.out.println("╔═════[VIDEO]═════>>>");
-        System.out.println("‖ Title: " + playerInfo.getName());
-        System.out.println("‖ Author: " + playerInfo.getAuthor());
-        System.out.println("‖ FMTs: " + playerInfo.getUrlEncodedFmtMap());
-        System.out.println("‖ Adaptive FMTs: " + playerInfo.getAdaptiveFmts());
-        System.out.println("‖ Thumbnail: " + playerInfo.getThumbnail());
-        System.out.println("‖ Relative loudness: " + playerInfo.getLoudness());
-        System.out.println("‖ Video player JS: " + playerInfo.getPlayerJSURL());
-        System.out.println("╚═════════════════>>>");
+        PlayerInfo playerInfo = new PlayerInfo(thumbnail, views, loudness, author, title, adaptiveFmts, fmts, scriptUrl);
 
         return playerInfo;
     }

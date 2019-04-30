@@ -11,21 +11,6 @@ public class Descrambler
     public Descrambler(List<DescramblerHelper.ProcStep> man)
     {
         this.man = man;
-
-        System.out.println("================================================================================");
-        System.out.println("Descrambler:");
-        for (ProcStep procStep : man)
-        {
-            if (procStep.getStepFunc() == Step.REVERSE)
-            {
-                System.out.println(" " + procStep.getStepFunc().toString());
-            }
-            else
-            {
-                System.out.println(" " + procStep.getStepFunc().toString() + ": " + procStep.getIndex());
-            }
-        }
-        System.out.println("================================================================================");
     }
 
     public String descramble(String input)

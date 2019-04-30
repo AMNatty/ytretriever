@@ -13,13 +13,10 @@ public class FMTParser
 
         List<YouTubeMultimedia> media = new ArrayList<>();
 
-        int i = 0;
-
         if (info.getAdaptiveFmts() != null)
+        {
             for (String b : info.getAdaptiveFmts().split(","))
             {
-                System.out.println("╔══>> Video " + i);
-
                 String url = null;
                 String signature = null;
                 String quality = null;
@@ -33,8 +30,6 @@ public class FMTParser
                 for (String vidParam : b.split("&"))
                 {
                     String parameter = DescramblerHelper.urlDecode(vidParam);
-
-                    System.out.println("‖ " + parameter);
 
                     if (parameter.startsWith("url="))
                     {
@@ -85,14 +80,11 @@ public class FMTParser
                 YouTubeMultimedia multimedia = new YouTubeMultimedia(url, mediaData);
 
                 media.add(multimedia);
-
-                i++;
             }
+        }
 
         for (String b : info.getUrlEncodedFmtMap().split(","))
         {
-            System.out.println("╔══>> Video " + i);
-
             String url = null;
             String signature = null;
             String quality = null;
@@ -103,8 +95,6 @@ public class FMTParser
             for (String vidParam : b.split("&"))
             {
                 String parameter = DescramblerHelper.urlDecode(vidParam);
-
-                System.out.println("‖ " + parameter);
 
                 if (parameter.startsWith("url="))
                 {
@@ -143,8 +133,6 @@ public class FMTParser
             YouTubeMultimedia multimedia = new YouTubeMultimedia(url, mediaData);
 
             media.add(multimedia);
-
-            i++;
         }
 
         return media;

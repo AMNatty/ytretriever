@@ -75,10 +75,6 @@ public class DescramblerHelper
 
     public static List<ProcStep> update(String playerJSUrlString)
     {
-        System.out.println("================================================================================");
-        System.out.println("Attempting to update descrambler code.");
-        System.out.println("================================================================================");
-
         List<UnprocessedStep> stepsUn = new ArrayList<UnprocessedStep>();
 
         String reverser = null;
@@ -99,8 +95,6 @@ public class DescramblerHelper
             String playerSourceCodeNoWhites = scriptStringBuilder.toString().replaceAll("\\s+", "");
 
             Pattern descramblerFuncPattern = Pattern.compile("function\\([a-zA-Z0-9]+\\)\\{(a=a\\.split\\(\"\"\\);.+?returna\\.join\\(\\\"\\\"\\))");
-            System.out.println("Regexing with: " + descramblerFuncPattern.toString());
-            System.out.println("================================================================================");
             Matcher descrablerFuncMatcher = descramblerFuncPattern.matcher(playerSourceCodeNoWhites);
 
             boolean found = descrablerFuncMatcher.find();
@@ -108,8 +102,6 @@ public class DescramblerHelper
             if (found)
             {
                 String descramblerSrc = descrablerFuncMatcher.group(1);
-                System.out.println(descramblerSrc);
-                System.out.println("================================================================================");
                 String[] descramblerCalls = descramblerSrc.split(";");
 
                 String cont = null;
@@ -125,7 +117,6 @@ public class DescramblerHelper
 
                     if (i != 0 && i != descramblerCalls.length - 1)
                     {
-                        System.out.println(descramblerCall);
                         String scoped = descramblerCall.substring(descramblerCall.indexOf(".") + 1);
                         String signatureU = scoped.substring(0, scoped.indexOf("("));
                         String indexUnpr = scoped.substring(scoped.indexOf(",") + 1).substring(0, scoped.substring(scoped.indexOf(",") + 1).length() - 1);
@@ -134,11 +125,7 @@ public class DescramblerHelper
                     }
                 }
 
-                System.out.println("================================================================================");
-
                 Pattern auxFunPattern = Pattern.compile("var" + cont + "=\\{(.+?)\\}\\}");
-                System.out.println("Regexing aux with: " + auxFunPattern.toString());
-                System.out.println("================================================================================");
                 Matcher auxFunMatcher = auxFunPattern.matcher(playerSourceCodeNoWhites);
 
                 boolean auxFound = auxFunMatcher.find();
@@ -146,9 +133,6 @@ public class DescramblerHelper
                 if (auxFound)
                 {
                     String auxFunctions = auxFunMatcher.group(1);
-
-                    System.out.println(auxFunctions);
-                    System.out.println("================================================================================");
 
                     String[] auxFunctionArray = auxFunctions.split("\\},");
 
@@ -172,21 +156,11 @@ public class DescramblerHelper
                         {
                             swapper = auxPair[0];
                         }
-
-                        System.out.println(auxFunction);
                     }
                 }
             }
 
             jsScanner.close();
-
-            System.out.println("================================================================================");
-
-            System.out.println("Swapper: " + swapper);
-            System.out.println("Splicer: " + splicer);
-            System.out.println("Reverser: " + reverser);
-
-            System.out.println("================================================================================");
 
             List<ProcStep> stepsF = new ArrayList<>();
 
