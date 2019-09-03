@@ -1,4 +1,4 @@
-package cz.tefek.youtubetoolkit;
+package cz.tefek.youtubetoolkit.multimedia;
 
 public class YouTubeMultimedia
 {

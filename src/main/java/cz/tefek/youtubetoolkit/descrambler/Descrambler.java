@@ -1,35 +1,35 @@
-package cz.tefek.youtubetoolkit;
+package cz.tefek.youtubetoolkit.descrambler;
 
 import java.util.List;
 
-import cz.tefek.youtubetoolkit.DescramblerHelper.ProcStep;
+import cz.tefek.youtubetoolkit.descrambler.DescramblerHelper.ProcStep;
 
 public class Descrambler
 {
-    private List<DescramblerHelper.ProcStep> man;
+    private List<DescramblerHelper.ProcStep> descrambleSteps;
 
     public Descrambler(List<DescramblerHelper.ProcStep> man)
     {
-        this.man = man;
+        this.descrambleSteps = man;
     }
 
     public String descramble(String input)
     {
         String result = input;
 
-        for (ProcStep procStep : man)
+        for (ProcStep procStep : descrambleSteps)
         {
-            if (procStep.getStepFunc() == Step.SPLICE)
+            if (procStep.getStepFunc() == DescramlerStep.SPLICE)
             {
                 result = splice0(result, procStep.getIndex());
             }
 
-            if (procStep.getStepFunc() == Step.REVERSE)
+            if (procStep.getStepFunc() == DescramlerStep.REVERSE)
             {
                 result = reverse(result);
             }
 
-            if (procStep.getStepFunc() == Step.SWAP)
+            if (procStep.getStepFunc() == DescramlerStep.SWAP)
             {
                 result = swap0(result, procStep.getIndex());
             }

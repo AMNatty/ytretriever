@@ -1,9 +1,10 @@
-package cz.tefek.youtubetoolkit;
+package cz.tefek.youtubetoolkit.descrambler;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -17,6 +18,7 @@ public class DescramblerHelper
         String out = null;
 
         if (input != null)
+        {
             try
             {
                 out = URLDecoder.decode(input, "UTF-8");
@@ -25,29 +27,49 @@ public class DescramblerHelper
             {
                 e.printStackTrace();
             }
+        }
+
+        return out;
+    }
+
+    public static String urlEncode(String input)
+    {
+        String out = null;
+
+        if (input != null)
+        {
+            try
+            {
+                out = URLEncoder.encode(input, "UTF-8");
+            }
+            catch (UnsupportedEncodingException e)
+            {
+                e.printStackTrace();
+            }
+        }
 
         return out;
     }
 
     public static class ProcStep
     {
-        public ProcStep(Step step, int index)
+        public ProcStep(DescramlerStep step, int index)
         {
             this.step = step;
             this.index = index;
         }
 
-        private Step step;
+        private DescramlerStep step;
         private int index;
 
-        public Step getStepFunc()
+        public DescramlerStep getStepFunc()
         {
-            return step;
+            return this.step;
         }
 
         public int getIndex()
         {
-            return index;
+            return this.index;
         }
     }
 
@@ -64,18 +86,18 @@ public class DescramblerHelper
 
         public String getUnprocessedOP()
         {
-            return unprocOP;
+            return this.unprocOP;
         }
 
         public int getIndex()
         {
-            return index;
+            return this.index;
         }
     }
 
     public static List<ProcStep> update(String playerJSUrlString)
     {
-        List<UnprocessedStep> stepsUn = new ArrayList<UnprocessedStep>();
+        List<UnprocessedStep> stepsUn = new ArrayList<>();
 
         String reverser = null;
         String splicer = null;
@@ -168,15 +190,15 @@ public class DescramblerHelper
             {
                 if (unprocessedStep.getUnprocessedOP().equals(swapper))
                 {
-                    stepsF.add(new ProcStep(Step.SWAP, unprocessedStep.getIndex()));
+                    stepsF.add(new ProcStep(DescramlerStep.SWAP, unprocessedStep.getIndex()));
                 }
                 else if (unprocessedStep.getUnprocessedOP().equals(splicer))
                 {
-                    stepsF.add(new ProcStep(Step.SPLICE, unprocessedStep.getIndex()));
+                    stepsF.add(new ProcStep(DescramlerStep.SPLICE, unprocessedStep.getIndex()));
                 }
                 else if (unprocessedStep.getUnprocessedOP().equals(reverser))
                 {
-                    stepsF.add(new ProcStep(Step.REVERSE, unprocessedStep.getIndex()));
+                    stepsF.add(new ProcStep(DescramlerStep.REVERSE, unprocessedStep.getIndex()));
                 }
             }
 

@@ -1,4 +1,4 @@
-package cz.tefek.youtubetoolkit;
+package cz.tefek.youtubetoolkit.multimedia;
 
 public class Multimedia
 {
@@ -7,6 +7,8 @@ public class Multimedia
     public static final int ITAG_MP4_480x360 = 18; // 480x360 MP4 AVC1 MP4A
     public static final int ITAG_WEBM_480x360 = 43; // 480x360 WEBM VP8 VORBIS
     public static final int ITAG_MP4_1280x720 = 22; // 1280x720 MP4 AVC1 MP4A
+
+    public static final int UNKNOWN_FPS = -2;
 
     public static final int UNKNOWN_BITRATE = -2;
     public static final int UNDEFINED_SIZE = -2;
@@ -21,8 +23,9 @@ public class Multimedia
     private String audioCodec;
     private String container;
     private int itag;
+    private int fps;
 
-    public Multimedia(boolean adaptive, String qualityName, int bitrate, int width, int height, int itag, String mediaType, String codecs)
+    public Multimedia(boolean adaptive, String qualityName, int bitrate, int width, int height, int itag, int fps, String mediaType, String codecs)
     {
         this.qualityName = qualityName;
         this.bitrate = bitrate;
@@ -33,18 +36,22 @@ public class Multimedia
         if (adaptive)
         {
             this.bitrate = bitrate / 1000;
-            this.type = mediaType.contains("video") ? MultimediaType.VIDEO : MultimediaType.AUDIO;
+            this.type = mediaType.contains("audio") ? MultimediaType.AUDIO : MultimediaType.VIDEO;
             this.container = mediaType.substring(mediaType.indexOf("/") + 1);
+
+            this.qualityName = this.qualityName == null ? "" : this.qualityName + " ";
 
             if (this.type == MultimediaType.VIDEO)
             {
-                this.qualityName = qualityName;
+                this.fps = fps;
                 this.videoCodec = codecs.trim();
+                this.qualityName = this.qualityName + "Video " + this.bitrate + "kbps " + this.videoCodec;
             }
             else
             {
+                this.fps = NOT_VIDEO;
                 this.audioCodec = codecs.trim();
-                this.qualityName = "Audio " + this.bitrate + "kbps " + this.audioCodec;
+                this.qualityName = this.qualityName + "Audio " + this.bitrate + "kbps " + this.audioCodec;
                 this.width = NOT_VIDEO;
                 this.height = NOT_VIDEO;
             }
@@ -56,8 +63,10 @@ public class Multimedia
             this.width = UNDEFINED_SIZE;
             this.height = UNDEFINED_SIZE;
 
-            this.bitrate = UNKNOWN_BITRATE;
+            this.bitrate = bitrate / 1000;
             this.type = MultimediaType.BOTH;
+
+            this.fps = fps;
 
             this.videoCodec = codecs.split(",")[0].trim();
             this.audioCodec = codecs.split(",")[1].trim();
@@ -102,47 +111,47 @@ public class Multimedia
 
     public MultimediaType getType()
     {
-        return type;
+        return this.type;
     }
 
     public int getBitrate()
     {
-        return bitrate;
+        return this.bitrate;
     }
 
     public int getWidth()
     {
-        return width;
+        return this.width;
     }
 
     public int getHeight()
     {
-        return height;
+        return this.height;
     }
 
     public String getQualityName()
     {
-        return qualityName;
+        return this.qualityName;
     }
 
     public String getVideoCodec()
     {
-        return videoCodec;
+        return this.videoCodec;
     }
 
     public String getAudioCodec()
     {
-        return audioCodec;
+        return this.audioCodec;
     }
 
     public String getContainer()
     {
-        return container;
+        return this.container;
     }
 
     public int getITag()
     {
-        return itag;
+        return this.itag;
     }
 
     public void printData()
@@ -167,11 +176,12 @@ public class Multimedia
         if (this.getBitrate() > 0)
         {
             System.out.println(" Bitrate: " + this.getBitrate() + "kbps");
+            System.out.println(" Quality: " + this.getQualityName());
         }
 
-        if (this.getBitrate() > 0)
+        if (this.getFps() > 0)
         {
-            System.out.println(" Quality: " + this.getQualityName());
+            System.out.println(" FPS: " + this.getFps());
         }
 
         System.out.println(" Itag: " + this.getITag());
@@ -180,5 +190,10 @@ public class Multimedia
         {
             System.out.println(" Standard dimensions: " + this.getWidth() + "x" + this.getHeight());
         }
+    }
+
+    public int getFps()
+    {
+        return this.fps;
     }
 }

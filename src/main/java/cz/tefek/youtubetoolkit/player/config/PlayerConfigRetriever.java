@@ -1,4 +1,4 @@
-package cz.tefek.youtubetoolkit;
+package cz.tefek.youtubetoolkit.player.config;
 
 import java.io.IOException;
 import java.net.URL;
@@ -9,9 +9,9 @@ import java.util.regex.Pattern;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
-public class PlayerInfoRetriever
+public class PlayerConfigRetriever
 {
-    public static PlayerInfo get(String videoID) throws IOException
+    public static PlayerConfig get(String videoID) throws IOException
     {
         URL url = new URL("https://www.youtube.com/watch?v=" + videoID);
         Scanner streamScanner = new Scanner(url.openStream());
@@ -72,18 +72,12 @@ public class PlayerInfoRetriever
         JSONObject assets = mainObj.getJSONObject("assets");
         JSONObject args = mainObj.getJSONObject("args");
 
+        String jsUrl = "http://s.ytimg.com" + assets.getString("js");
+
         String fmts = args.optString("url_encoded_fmt_stream_map", null);
         String adaptiveFmts = args.optString("adaptive_fmts", null);
-        String thumbnail = args.getString("thumbnail_url");
-        String author = args.getString("author");
-        String scriptUrl = "http://s.ytimg.com" + assets.getString("js");
-        String title = args.getString("title");
+        String playerResponse = args.optString("player_response", null);
 
-        long views = args.optLong("view_count", Long.MIN_VALUE);
-        double loudness = args.optDouble("relative_loudness", 0.0);
-
-        PlayerInfo playerInfo = new PlayerInfo(thumbnail, views, loudness, author, title, adaptiveFmts, fmts, scriptUrl);
-
-        return playerInfo;
+        return new PlayerConfig(jsUrl, fmts, adaptiveFmts, playerResponse);
     }
 }
