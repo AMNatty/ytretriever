@@ -1,4 +1,8 @@
-target/
-.settings/
-.classpath
-.project
+/.idea/
+/*.iml
+/out
+/logs
+/temp
+/target
+
+*.cfg

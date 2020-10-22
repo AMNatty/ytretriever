@@ -1,56 +1,19 @@
 package cz.tefek.youtubetoolkit.descrambler;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URL;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+
 public class DescramblerHelper
 {
-    public static String urlDecode(String input)
-    {
-        String out = null;
-
-        if (input != null)
-        {
-            try
-            {
-                out = URLDecoder.decode(input, "UTF-8");
-            }
-            catch (UnsupportedEncodingException e)
-            {
-                e.printStackTrace();
-            }
-        }
-
-        return out;
-    }
-
-    public static String urlEncode(String input)
-    {
-        String out = null;
-
-        if (input != null)
-        {
-            try
-            {
-                out = URLEncoder.encode(input, "UTF-8");
-            }
-            catch (UnsupportedEncodingException e)
-            {
-                e.printStackTrace();
-            }
-        }
-
-        return out;
-    }
-
     public static class ProcStep
     {
         public ProcStep(DescramlerStep step, int index)
@@ -95,7 +58,7 @@ public class DescramblerHelper
         }
     }
 
-    public static List<ProcStep> update(String playerJSUrlString)
+    public static List<ProcStep> update(String playerJSUrlString) throws IOException
     {
         List<UnprocessedStep> stepsUn = new ArrayList<>();
 
@@ -103,112 +66,122 @@ public class DescramblerHelper
         String splicer = null;
         String swapper = null;
 
-        try
+        StringBuilder scriptStringBuilder = new StringBuilder();
+        URL playerJSUrl = new URL(playerJSUrlString);
+
+        System.out.printf("Downloading script config from: %s\n", playerJSUrlString);
+
+        try (InputStream is = playerJSUrl.openStream())
         {
-            StringBuilder scriptStringBuilder = new StringBuilder();
-            URL playerJSUrl = new URL(playerJSUrlString);
-            Scanner jsScanner = new Scanner(playerJSUrl.openStream());
+            BufferedReader jsReader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
 
-            while (jsScanner.hasNext())
+            String line;
+
+            while ((line = jsReader.readLine()) != null)
             {
-                scriptStringBuilder.append(jsScanner.nextLine());
+                scriptStringBuilder.append(line);
             }
-
-            String playerSourceCodeNoWhites = scriptStringBuilder.toString().replaceAll("\\s+", "");
-
-            Pattern descramblerFuncPattern = Pattern.compile("function\\([a-zA-Z0-9]+\\)\\{(a=a\\.split\\(\"\"\\);.+?returna\\.join\\(\\\"\\\"\\))");
-            Matcher descrablerFuncMatcher = descramblerFuncPattern.matcher(playerSourceCodeNoWhites);
-
-            boolean found = descrablerFuncMatcher.find();
-
-            if (found)
-            {
-                String descramblerSrc = descrablerFuncMatcher.group(1);
-                String[] descramblerCalls = descramblerSrc.split(";");
-
-                String cont = null;
-
-                for (int i = 0; i < descramblerCalls.length; i++)
-                {
-                    String descramblerCall = descramblerCalls[i];
-
-                    if (i == 1)
-                    {
-                        cont = descramblerCall.substring(0, descramblerCall.indexOf("."));
-                    }
-
-                    if (i != 0 && i != descramblerCalls.length - 1)
-                    {
-                        String scoped = descramblerCall.substring(descramblerCall.indexOf(".") + 1);
-                        String signatureU = scoped.substring(0, scoped.indexOf("("));
-                        String indexUnpr = scoped.substring(scoped.indexOf(",") + 1).substring(0, scoped.substring(scoped.indexOf(",") + 1).length() - 1);
-
-                        stepsUn.add(new UnprocessedStep(signatureU, Integer.parseInt(indexUnpr)));
-                    }
-                }
-
-                Pattern auxFunPattern = Pattern.compile("var" + cont + "=\\{(.+?)\\}\\}");
-                Matcher auxFunMatcher = auxFunPattern.matcher(playerSourceCodeNoWhites);
-
-                boolean auxFound = auxFunMatcher.find();
-
-                if (auxFound)
-                {
-                    String auxFunctions = auxFunMatcher.group(1);
-
-                    String[] auxFunctionArray = auxFunctions.split("\\},");
-
-                    for (int i = 0; i < auxFunctionArray.length; i++)
-                    {
-                        String auxFunction = auxFunctionArray[i];
-
-                        String[] auxPair = auxFunction.split(":");
-
-                        if (auxPair[1].contains("splice"))
-                        {
-                            splicer = auxPair[0];
-                        }
-
-                        if (auxPair[1].contains("reverse"))
-                        {
-                            reverser = auxPair[0];
-                        }
-
-                        if (auxPair[1].contains("%"))
-                        {
-                            swapper = auxPair[0];
-                        }
-                    }
-                }
-            }
-
-            jsScanner.close();
-
-            List<ProcStep> stepsF = new ArrayList<>();
-
-            for (UnprocessedStep unprocessedStep : stepsUn)
-            {
-                if (unprocessedStep.getUnprocessedOP().equals(swapper))
-                {
-                    stepsF.add(new ProcStep(DescramlerStep.SWAP, unprocessedStep.getIndex()));
-                }
-                else if (unprocessedStep.getUnprocessedOP().equals(splicer))
-                {
-                    stepsF.add(new ProcStep(DescramlerStep.SPLICE, unprocessedStep.getIndex()));
-                }
-                else if (unprocessedStep.getUnprocessedOP().equals(reverser))
-                {
-                    stepsF.add(new ProcStep(DescramlerStep.REVERSE, unprocessedStep.getIndex()));
-                }
-            }
-
-            return stepsF;
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
         }
 
-        return null;
+        String scriptSourceCode = scriptStringBuilder.toString();
+
+        String playerSourceCodeNoWhites = scriptSourceCode.replaceAll("\\s+", "");
+
+        Pattern descramblerFuncPattern = Pattern.compile("function\\([a-zA-Z0-9]+\\)" + "\\{" + "(" + "a=a\\.split\\(\"\"\\);" + "[a-zA-Z0-9.,();$]+?" + "returna\\.join\\(\"\"\\)" + ")");
+        Matcher descrablerFuncMatcher = descramblerFuncPattern.matcher(playerSourceCodeNoWhites);
+
+        boolean found = descrablerFuncMatcher.find();
+
+        if (found)
+        {
+            String descramblerSrc = descrablerFuncMatcher.group(1);
+            String[] descramblerCalls = descramblerSrc.split(";");
+
+            String field = null;
+
+            for (int i = 1; i < descramblerCalls.length - 1; i++)
+            {
+                String descramblerCall = descramblerCalls[i];
+                var call = descramblerCall.split("[.(),]");
+                field = call[0];
+
+                String funcName = call[1];
+                String indexUnpr = call[3];
+
+                stepsUn.add(new UnprocessedStep(funcName, Integer.parseInt(indexUnpr)));
+            }
+
+            if (field == null)
+                throw new RuntimeException("Failed to detect the descramble function object.");
+
+            System.out.println("Descramble function object: " + field);
+
+            Pattern auxFunPattern = Pattern.compile("var"
+                    + Pattern.quote(field)
+                    + "=\\{"
+                    + "((?:" + "[a-zA-Z]+[a-zA-Z0-9]*:function\\(.+?\\)"
+                    + "\\{.+?};?" + ")+)"
+                    + "}");
+            Matcher auxFunMatcher = auxFunPattern.matcher(playerSourceCodeNoWhites);
+
+            boolean auxFound = auxFunMatcher.find();
+
+            if (auxFound)
+            {
+                String auxFunctions = auxFunMatcher.group(1);
+
+                String[] auxFunctionArray = auxFunctions.split("},");
+
+                for (var auxFunction : auxFunctionArray)
+                {
+                    String[] auxPair = auxFunction.split(":");
+
+                    if (auxPair[1].contains("splice"))
+                    {
+                        splicer = auxPair[0];
+                    }
+
+                    if (auxPair[1].contains("reverse"))
+                    {
+                        reverser = auxPair[0];
+                    }
+
+                    if (auxPair[1].contains("%"))
+                    {
+                        swapper = auxPair[0];
+                    }
+                }
+
+                System.out.println("Descrambler config found.");
+            }
+            else
+            {
+                System.err.println("Did not find descramble functions!");
+            }
+        }
+        else
+        {
+            System.out.println("Descrambler config NOT found.");
+        }
+
+        List<ProcStep> stepsF = new ArrayList<>();
+
+        for (UnprocessedStep unprocessedStep : stepsUn)
+        {
+            if (unprocessedStep.getUnprocessedOP().equals(swapper))
+            {
+                stepsF.add(new ProcStep(DescramlerStep.SWAP, unprocessedStep.getIndex()));
+            }
+            else if (unprocessedStep.getUnprocessedOP().equals(splicer))
+            {
+                stepsF.add(new ProcStep(DescramlerStep.SPLICE, unprocessedStep.getIndex()));
+            }
+            else if (unprocessedStep.getUnprocessedOP().equals(reverser))
+            {
+                stepsF.add(new ProcStep(DescramlerStep.REVERSE, unprocessedStep.getIndex()));
+            }
+        }
+
+        return stepsF;
     }
 }

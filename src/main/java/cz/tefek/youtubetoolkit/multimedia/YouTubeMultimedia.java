@@ -13,11 +13,11 @@ public class YouTubeMultimedia
 
     public String getUrl()
     {
-        return url;
+        return this.url;
     }
 
     public Multimedia getMediaData()
     {
-        return media;
+        return this.media;
     }
 }

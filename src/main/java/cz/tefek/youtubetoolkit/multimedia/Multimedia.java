@@ -1,5 +1,7 @@
 package cz.tefek.youtubetoolkit.multimedia;
 
+import cz.tefek.youtubetoolkit.util.YouTubeMIME;
+
 public class Multimedia
 {
     public static final int ITAG_3GPP_176x144 = 17; // 176x144 3GPP MP4V MP4A
@@ -25,7 +27,7 @@ public class Multimedia
     private int itag;
     private int fps;
 
-    public Multimedia(boolean adaptive, String qualityName, int bitrate, int width, int height, int itag, int fps, String mediaType, String codecs)
+    public Multimedia(boolean adaptive, String qualityName, int bitrate, int width, int height, int itag, int fps, YouTubeMIME mime)
     {
         this.qualityName = qualityName;
         this.bitrate = bitrate;
@@ -33,24 +35,30 @@ public class Multimedia
         this.height = height;
         this.itag = itag;
 
+        var codecs = mime.getCodecs();
+
         if (adaptive)
         {
             this.bitrate = bitrate / 1000;
-            this.type = mediaType.contains("audio") ? MultimediaType.AUDIO : MultimediaType.VIDEO;
-            this.container = mediaType.substring(mediaType.indexOf("/") + 1);
+            this.type = mime.getType().equals("audio") ? MultimediaType.AUDIO : MultimediaType.VIDEO;
+            this.container = mime.getName();
 
             this.qualityName = this.qualityName == null ? "" : this.qualityName + " ";
 
             if (this.type == MultimediaType.VIDEO)
             {
+                assert codecs.size() == 1;
+
                 this.fps = fps;
-                this.videoCodec = codecs.trim();
+                this.videoCodec = codecs.get(0);
                 this.qualityName = this.qualityName + "Video " + this.bitrate + "kbps " + this.videoCodec;
             }
             else
             {
+                assert codecs.size() == 1;
+
                 this.fps = NOT_VIDEO;
-                this.audioCodec = codecs.trim();
+                this.audioCodec = codecs.get(0);
                 this.qualityName = this.qualityName + "Audio " + this.bitrate + "kbps " + this.audioCodec;
                 this.width = NOT_VIDEO;
                 this.height = NOT_VIDEO;
@@ -58,6 +66,8 @@ public class Multimedia
         }
         else
         {
+            assert codecs.size() == 2;
+
             this.qualityName = qualityName;
 
             this.width = UNDEFINED_SIZE;
@@ -68,8 +78,8 @@ public class Multimedia
 
             this.fps = fps;
 
-            this.videoCodec = codecs.split(",")[0].trim();
-            this.audioCodec = codecs.split(",")[1].trim();
+            this.videoCodec = codecs.get(0);
+            this.audioCodec = codecs.get(1);
 
             if (itag == ITAG_3GPP_176x144)
             {

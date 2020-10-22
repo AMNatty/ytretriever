@@ -17,21 +17,19 @@ public class Descrambler
     {
         String result = input;
 
-        for (ProcStep procStep : descrambleSteps)
+        for (ProcStep procStep : this.descrambleSteps)
         {
-            if (procStep.getStepFunc() == DescramlerStep.SPLICE)
+            switch (procStep.getStepFunc())
             {
-                result = splice0(result, procStep.getIndex());
-            }
-
-            if (procStep.getStepFunc() == DescramlerStep.REVERSE)
-            {
-                result = reverse(result);
-            }
-
-            if (procStep.getStepFunc() == DescramlerStep.SWAP)
-            {
-                result = swap0(result, procStep.getIndex());
+                case SPLICE:
+                    result = splice0(result, procStep.getIndex());
+                    break;
+                case REVERSE:
+                    result = reverse(result);
+                    break;
+                case SWAP:
+                    result = this.swap0(result, procStep.getIndex());
+                    break;
             }
         }
 

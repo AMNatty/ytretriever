@@ -2,8 +2,6 @@ package cz.tefek.youtubetoolkit.metadata;
 
 public class YouTubeMetadata
 {
-    private String videoID;
-
     private String title;
 
     private String author;
@@ -19,9 +17,8 @@ public class YouTubeMetadata
 
     private double loudness;
 
-    public YouTubeMetadata(String videoID, String title, String author, long views, long length, boolean allowRatings, double rating, double loudness, boolean useCipher)
+    public YouTubeMetadata(String title, String author, long views, long length, boolean allowRatings, double rating, double loudness, boolean useCipher)
     {
-        this.videoID = videoID;
         this.title = title;
         this.author = author;
         this.useCipher = useCipher;
@@ -35,11 +32,6 @@ public class YouTubeMetadata
     public String getTitle()
     {
         return this.title;
-    }
-
-    public String getVideoID()
-    {
-        return this.videoID;
     }
 
     public String getAuthor()

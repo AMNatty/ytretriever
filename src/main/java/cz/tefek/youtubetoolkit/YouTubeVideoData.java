@@ -1,5 +1,6 @@
 package cz.tefek.youtubetoolkit;
 
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -9,41 +10,33 @@ import cz.tefek.youtubetoolkit.multimedia.YouTubeMultimedia;
 
 public class YouTubeVideoData
 {
-    private YouTubeMetadata metadata;
-    private List<YouTubeMultimedia> adaptiveMedia;
-    private List<YouTubeMultimedia> legacyMedia;
+    private final String videoID;
+    private final YouTubeMetadata metadata;
+    private final List<YouTubeMultimedia> adaptiveMedia;
+    private final List<YouTubeMultimedia> legacyMedia;
 
-    public YouTubeVideoData(YouTubeMetadata youTubeMetadata, List<YouTubeMultimedia> adaptiveMedia, List<YouTubeMultimedia> legacyMedia, List<YouTubeMultimedia> oldAdaptiveMedia, List<YouTubeMultimedia> oldLegacyMedia)
+    public YouTubeVideoData(String videoID, YouTubeMetadata youTubeMetadata, List<YouTubeMultimedia> adaptiveMedia, List<YouTubeMultimedia> legacyMedia)
     {
+        this.videoID = videoID;
         this.metadata = youTubeMetadata;
 
-        if (adaptiveMedia == null || adaptiveMedia.isEmpty())
-        {
-            this.adaptiveMedia = oldAdaptiveMedia;
-        }
-        else
-        {
-            this.adaptiveMedia = adaptiveMedia;
-        }
+        this.adaptiveMedia = adaptiveMedia;
+        this.legacyMedia = legacyMedia;
+    }
 
-        if (legacyMedia == null || legacyMedia.isEmpty())
-        {
-            this.legacyMedia = oldLegacyMedia;
-        }
-        else
-        {
-            this.legacyMedia = legacyMedia;
-        }
+    public String getVideoID()
+    {
+        return this.videoID;
     }
 
     public List<YouTubeMultimedia> getAdaptiveMedia()
     {
-        return this.adaptiveMedia;
+        return Collections.unmodifiableList(this.adaptiveMedia);
     }
 
     public List<YouTubeMultimedia> getLegacyMedia()
     {
-        return this.legacyMedia;
+        return Collections.unmodifiableList(this.legacyMedia);
     }
 
     public YouTubeMetadata getMetadata()
