@@ -3,7 +3,6 @@ package cz.tefek.youtubetoolkit.parser;
 import java.util.ArrayList;
 
 import org.json.JSONObject;
-import org.json.JSONTokener;
 
 import cz.tefek.youtubetoolkit.descrambler.Descrambler;
 import cz.tefek.youtubetoolkit.metadata.YouTubeMetadata;
@@ -15,41 +14,21 @@ import cz.tefek.youtubetoolkit.util.YouTubeMIME;
 
 public class PlayerResponseParser
 {
-    public static PlayerResponse parse(Descrambler descrambler, String inputJsonString)
+    public static PlayerResponse parse(Descrambler descrambler, JSONObject playerConfig, JSONObject videoDetails, JSONObject streamingData)
     {
-        if (inputJsonString == null || inputJsonString.isBlank())
-        {
-            return null;
-        }
+        var title = videoDetails.getString("title");
 
-        var jsonTokener = new JSONTokener(inputJsonString);
-        var rootObj = new JSONObject(jsonTokener);
+        var author = videoDetails.getString("author");
 
-        var streamingData = rootObj.optJSONObject("streamingData");
+        var views = videoDetails.getLong("viewCount");
+        var length = videoDetails.getLong("lengthSeconds");
 
-        if (streamingData == null)
-        {
-            return null;
-        }
+        var allowRatings = videoDetails.getBoolean("allowRatings");
+        var rating = videoDetails.getDouble("averageRating");
 
-        var videoDetailsObj = rootObj.getJSONObject("videoDetails");
-
-        var videoID = videoDetailsObj.getString("videoId");
-        var title = videoDetailsObj.getString("title");
-
-        var author = videoDetailsObj.getString("author");
-
-        var views = videoDetailsObj.getLong("viewCount");
-        var length = videoDetailsObj.getLong("lengthSeconds");
-
-        var allowRatings = videoDetailsObj.getBoolean("allowRatings");
-        var rating = videoDetailsObj.getDouble("averageRating");
-
-        var useCipher = videoDetailsObj.optBoolean("useCipher", false);
+        var useCipher = videoDetails.optBoolean("useCipher", false);
 
         var loudness = 0.0d;
-
-        var playerConfig = rootObj.getJSONObject("playerConfig");
 
         if (playerConfig != null)
         {

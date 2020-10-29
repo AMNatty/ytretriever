@@ -1,39 +1,41 @@
 package cz.tefek.youtubetoolkit.player.config;
 
+import org.json.JSONObject;
+
 public class PlayerConfig
 {
-    private String oldLegacyFmts;
-    private String oldAdaptiveFmts;
+    private final String youtubePlayerJSUrl;
 
-    private String youtubePlayerResponse;
+    private final JSONObject youtubePlayerConfig;
+    private final JSONObject youtubeVideoDetails;
+    private final JSONObject youtubeStreamingData;
 
-    private String youtubePlayerJSUrl;
-
-    public PlayerConfig(String youtubePlayerJSUrl, String oldLegacyFmts, String oldAdaptiveFmts, String youtubePlayerResponse)
+    public PlayerConfig(String youtubePlayerJSUrl, JSONObject playerConfig, JSONObject videoDetails, JSONObject streamingData)
     {
-        this.oldLegacyFmts = oldLegacyFmts;
-        this.oldAdaptiveFmts = oldAdaptiveFmts;
-        this.youtubePlayerResponse = youtubePlayerResponse;
         this.youtubePlayerJSUrl = youtubePlayerJSUrl;
-    }
 
-    public String getOldAdaptiveFmts()
-    {
-        return this.oldAdaptiveFmts;
-    }
-
-    public String getOldLegacyFmts()
-    {
-        return this.oldLegacyFmts;
-    }
-
-    public String getYouTubePlayerResponse()
-    {
-        return this.youtubePlayerResponse;
+        this.youtubePlayerConfig = playerConfig;
+        this.youtubeVideoDetails = videoDetails;
+        this.youtubeStreamingData = streamingData;
     }
 
     public String getYouTubePlayerJSUrl()
     {
         return this.youtubePlayerJSUrl;
+    }
+
+    public JSONObject getYoutubePlayerConfig()
+    {
+        return this.youtubePlayerConfig;
+    }
+
+    public JSONObject getYoutubeStreamingData()
+    {
+        return this.youtubeStreamingData;
+    }
+
+    public JSONObject getYoutubeVideoDetails()
+    {
+        return this.youtubeVideoDetails;
     }
 }

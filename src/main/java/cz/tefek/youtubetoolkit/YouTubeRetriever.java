@@ -16,7 +16,7 @@ public class YouTubeRetriever
         var info = PlayerConfigRetriever.get(videoID);
         var descrambleSteps = DescramblerHelper.update(info.getYouTubePlayerJSUrl());
         Descrambler descrambler = new Descrambler(descrambleSteps);
-        var response = PlayerResponseParser.parse(descrambler, info.getYouTubePlayerResponse());
+        var response = PlayerResponseParser.parse(descrambler, info.getYoutubePlayerConfig(), info.getYoutubeVideoDetails(), info.getYoutubeStreamingData());
 
         return new YouTubeVideoData(videoID, response.getMetadata(), response.getAdaptiveFmts(), response.getLegacyFmts());
     }

@@ -16,23 +16,36 @@ public class PlayerConfigRetriever
         Document videoDocument = Jsoup.connect(Configuration.YOUTUBE_BASE_URL + "/watch?v=" + videoID).userAgent(Configuration.USER_AGENT).get();
         Elements scriptTags = videoDocument.getElementsByTag("script");
 
+        String jsUrl = null;
         String configScript = null;
 
         for (Element element : scriptTags)
         {
             String scriptContents = element.data();
+            String src = element.attr("src");
 
-            if (scriptContents.contains("ytplayer.config"))
+            if (src.matches("/s/player/[0-9a-z]+/player_.+?/.+?/base.js"))
+            {
+                jsUrl = Configuration.SCRIPT_BASE_URL + src;
+            }
+
+            if (scriptContents.contains("ytplayer.config ="))
             {
                 configScript = scriptContents;
-                break;
             }
         }
 
+        if (jsUrl == null)
+            throw new RuntimeException("Did not find the YouTube player config JavaScript file.");
+        else
+            System.out.printf("Detected player JS URL: %s%n", jsUrl);
+
         if (configScript == null)
             throw new RuntimeException("Did not find ytplayer.config.");
+        else
+            System.out.printf("Detected ytplayer.config.%n");
 
-        configScript = configScript.substring(configScript.indexOf("ytplayer.config"));
+        configScript = configScript.substring(configScript.indexOf("ytplayer.config ="));
         configScript = configScript.substring(configScript.indexOf("{"));
 
         int bracketCounter = 0;
@@ -77,16 +90,12 @@ public class PlayerConfigRetriever
         JSONTokener jsonTokener = new JSONTokener(configScript);
 
         JSONObject mainObj = new JSONObject(jsonTokener);
-
-        JSONObject assets = mainObj.getJSONObject("assets");
         JSONObject args = mainObj.getJSONObject("args");
+        JSONObject playerResponse = new JSONObject(new JSONTokener(args.getString("player_response")));
 
-        String jsUrl = Configuration.SCRIPT_BASE_URL + assets.getString("js");
-
-        String fmts = args.optString("url_encoded_fmt_stream_map", null);
-        String adaptiveFmts = args.optString("adaptive_fmts", null);
-        String playerResponse = args.optString("player_response", null);
-
-        return new PlayerConfig(jsUrl, fmts, adaptiveFmts, playerResponse);
+        return new PlayerConfig(jsUrl,
+                playerResponse.getJSONObject("playerConfig"),
+                playerResponse.getJSONObject("videoDetails"),
+                playerResponse.getJSONObject("streamingData"));
     }
 }
