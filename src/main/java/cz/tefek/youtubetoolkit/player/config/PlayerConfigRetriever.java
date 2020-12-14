@@ -29,7 +29,7 @@ public class PlayerConfigRetriever
                 jsUrl = Configuration.SCRIPT_BASE_URL + src;
             }
 
-            if (scriptContents.contains("ytplayer.config ="))
+            if (scriptContents.contains("ytInitialPlayerResponse ="))
             {
                 configScript = scriptContents;
             }
@@ -41,11 +41,11 @@ public class PlayerConfigRetriever
             System.out.printf("Detected player JS URL: %s%n", jsUrl);
 
         if (configScript == null)
-            throw new RuntimeException("Did not find ytplayer.config.");
+            throw new RuntimeException("Did not find ytInitialPlayerResponse.");
         else
-            System.out.printf("Detected ytplayer.config.%n");
+            System.out.printf("Detected ytInitialPlayerResponse.%n");
 
-        configScript = configScript.substring(configScript.indexOf("ytplayer.config ="));
+        configScript = configScript.substring(configScript.indexOf("ytInitialPlayerResponse ="));
         configScript = configScript.substring(configScript.indexOf("{"));
 
         int bracketCounter = 0;
@@ -90,12 +90,10 @@ public class PlayerConfigRetriever
         JSONTokener jsonTokener = new JSONTokener(configScript);
 
         JSONObject mainObj = new JSONObject(jsonTokener);
-        JSONObject args = mainObj.getJSONObject("args");
-        JSONObject playerResponse = new JSONObject(new JSONTokener(args.getString("player_response")));
 
         return new PlayerConfig(jsUrl,
-                playerResponse.getJSONObject("playerConfig"),
-                playerResponse.getJSONObject("videoDetails"),
-                playerResponse.getJSONObject("streamingData"));
+            mainObj.getJSONObject("playerConfig"),
+            mainObj.getJSONObject("videoDetails"),
+            mainObj.getJSONObject("streamingData"));
     }
 }
