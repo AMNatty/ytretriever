@@ -13,7 +13,12 @@ public class PlayerConfigRetriever
 {
     public static PlayerConfig get(String videoID) throws Exception
     {
-        Document videoDocument = Jsoup.connect(Configuration.YOUTUBE_BASE_URL + "/watch?v=" + videoID).userAgent(Configuration.USER_AGENT).get();
+        Document videoDocument = Jsoup.connect(Configuration.YOUTUBE_BASE_URL + "/watch?v=" + videoID)
+            .userAgent(Configuration.USER_AGENT)
+            // The so-called cookie consent cookie actually seems to be necessary, because YouTube checks it server-side for some reason
+            .cookie("CONSENT", "YES+cb.99999999-99-p0.en+FX+000")
+            .get();
+
         Elements scriptTags = videoDocument.getElementsByTag("script");
 
         String jsUrl = null;
