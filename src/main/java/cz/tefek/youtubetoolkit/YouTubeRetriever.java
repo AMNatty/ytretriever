@@ -1,7 +1,6 @@
 package cz.tefek.youtubetoolkit;
 
 import cz.tefek.youtubetoolkit.descrambler.Descrambler;
-import cz.tefek.youtubetoolkit.descrambler.DescramblerHelper;
 import cz.tefek.youtubetoolkit.parser.PlayerResponseParser;
 import cz.tefek.youtubetoolkit.player.config.PlayerConfigRetriever;
 
@@ -14,9 +13,8 @@ public class YouTubeRetriever
         System.out.println("------------------");
 
         var info = PlayerConfigRetriever.get(videoID);
-        var descrambleSteps = DescramblerHelper.update(info.getYouTubePlayerJSUrl());
-        Descrambler descrambler = new Descrambler(descrambleSteps);
-        var response = PlayerResponseParser.parse(descrambler, info.getYoutubePlayerConfig(), info.getYoutubeVideoDetails(), info.getYoutubeStreamingData());
+        var descrambler = Descrambler.from(info.youtubePlayerJSUrl());
+        var response = PlayerResponseParser.parse(descrambler, info.youtubePlayerConfig(), info.youtubeVideoDetails(), info.youtubeStreamingData());
 
         return new YouTubeVideoData(videoID, response.getMetadata(), response.getAdaptiveFmts(), response.getLegacyFmts());
     }

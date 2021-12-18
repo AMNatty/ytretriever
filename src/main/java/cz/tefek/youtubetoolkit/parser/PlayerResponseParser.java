@@ -24,7 +24,6 @@ public class PlayerResponseParser
         var length = videoDetails.getLong("lengthSeconds");
 
         var allowRatings = videoDetails.getBoolean("allowRatings");
-        var rating = videoDetails.getDouble("averageRating");
 
         var useCipher = videoDetails.optBoolean("useCipher", false);
 
@@ -40,7 +39,7 @@ public class PlayerResponseParser
             }
         }
 
-        var metadata = new YouTubeMetadata(title, author, views, length, allowRatings, rating, loudness, useCipher);
+        var metadata = new YouTubeMetadata(title, author, views, length, allowRatings, loudness, useCipher);
 
         var legacyFormats = streamingData.getJSONArray("formats");
 

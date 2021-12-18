@@ -96,6 +96,15 @@ public class PlayerConfigRetriever
 
         JSONObject mainObj = new JSONObject(jsonTokener);
 
+        var playabilityStatus = mainObj.optJSONObject("playabilityStatus");
+        if (playabilityStatus != null)
+        {
+            var status = playabilityStatus.optString("status");
+
+            if ("LOGIN_REQUIRED".equalsIgnoreCase(status))
+                throw new UnsupportedOperationException("YTRetriever does not support (age/...) restricted videos.");
+        }
+
         return new PlayerConfig(jsUrl,
             mainObj.getJSONObject("playerConfig"),
             mainObj.getJSONObject("videoDetails"),

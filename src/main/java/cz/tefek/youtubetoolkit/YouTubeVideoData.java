@@ -46,11 +46,17 @@ public class YouTubeVideoData
 
     public YouTubeMultimedia getBestAudio()
     {
-        return this.adaptiveMedia.stream().filter(media -> media.getMediaData().getType() == MultimediaType.AUDIO).max(Comparator.comparing(mm -> mm.getMediaData().getBitrate())).orElse(null);
+        return this.adaptiveMedia.stream()
+            .filter(media -> media.getMediaData().getType() == MultimediaType.AUDIO)
+            .max(Comparator.comparing(mm -> mm.getMediaData().getBitrate()))
+            .orElse(null);
     }
 
     public YouTubeMultimedia getBestVideo()
     {
-        return this.adaptiveMedia.stream().filter(media -> media.getMediaData().getType() == MultimediaType.VIDEO).max(Comparator.comparing(mm -> mm.getMediaData().getBitrate())).orElse(null);
+        return this.adaptiveMedia.stream()
+            .filter(media -> media.getMediaData().getType() == MultimediaType.VIDEO)
+            .max(Comparator.comparing(mm -> mm.getMediaData().getBitrate()))
+            .orElse(null);
     }
 }
